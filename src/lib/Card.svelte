@@ -8,9 +8,6 @@ const isRed = card.suit === '♦️' || card.suit === '♥️';
 
 const classNames = [
 	'position',
-	'border',
-	'border-2',
-	isRed ? 'border-red-600' : 'border-black',
 	'w-24',
 	'h-36',
 	'rounded-md',
@@ -19,10 +16,9 @@ const classNames = [
 	'items-center',
 	'text-3xl',
 	'justify-center',
-	'bg-white',
 	'cursor-pointer',
 	isRed ? 'text-red-600' : 'text-black',
-	'bg-white'
+	card.isFaceDown ? 'bg-red-500' : 'bg-white',
 ];
 
 let ref: HTMLDivElement | null = null;
@@ -46,11 +42,13 @@ function handleClick() {
 }
 
 function handlePointerDown(e: PointerEvent) {
+	if (card.isFaceDown) return;
 	ref?.setPointerCapture(e.pointerId);
 	probablyDragging = true;
 }
 
 function handlePointerMove(e: PointerEvent) {
+	if (card.isFaceDown) return;
 	if (isDragging) {
 		x += e.movementX + dx;
 		y += e.movementY + dy;
@@ -68,6 +66,7 @@ function handlePointerMove(e: PointerEvent) {
 }
 
 function handlePointerUp(e: PointerEvent) {
+	if (card.isFaceDown) return;
   ref?.releasePointerCapture(e.pointerId);
 	probablyDragging = false;
 	x = 0;
@@ -93,6 +92,8 @@ $: draggingStyles = `
 	class={classNames.join(' ')}
 	style={draggingStyles}
 >
+	<!-- {#if !card.isFaceDown} -->
 	<span class="pointer-events-none select-none">{card.rank}</span>
 	<span class="pointer-events-none select-none">{card.suit}</span>
+	<!-- {/if} -->
 </div>

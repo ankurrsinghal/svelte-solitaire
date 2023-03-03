@@ -1,6 +1,7 @@
 <script lang="ts">
 import { getContext } from 'svelte';
 import type { Writable } from 'svelte/store';
+import { beforeUpdate } from 'svelte';
 import Card from './Card.svelte';
 import NoCardPile from './NoCardPile.svelte';
 import { isCardInPile, type CardPile, type CardType, type StoreProps } from './store';
@@ -8,7 +9,10 @@ import { isCardInPile, type CardPile, type CardType, type StoreProps } from './s
 export let pile: CardPile;
 
 const store = getContext<StoreProps>('store');
-const cards = $store.filter(card => isCardInPile(card, pile));
+$: cards = $store.filter(card => isCardInPile(card, pile));
+$: {
+	if (pile.type === "stock" && pile.status === "close") cards.reverse();
+}
 
 const isCascadable = pile.type === 'tableau';
 
