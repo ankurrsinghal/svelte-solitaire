@@ -1,5 +1,6 @@
 <script lang="ts">
-import type { CardType } from './store';
+  import { getContext } from 'svelte';
+import type { CardType, StoreProps } from './store';
 
 export let card: CardType;
 
@@ -27,24 +28,48 @@ const classNames = [
 let ref: HTMLDivElement | null = null;
 
 let isDragging = false;
+let probablyDragging = false;
 let x = 0;
 let y = 0;
 
+let dx = 0;
+let dy = 0;
+
+const store = getContext<StoreProps>('store');
+
+function handleClick() {
+	if (!isDragging) {
+		// handle click here
+	} else {
+		isDragging = false;
+	}
+}
+
 function handlePointerDown(e: PointerEvent) {
 	ref?.setPointerCapture(e.pointerId);
-	isDragging = true;
+	probablyDragging = true;
 }
 
 function handlePointerMove(e: PointerEvent) {
 	if (isDragging) {
-		x += e.movementX;
-		y += e.movementY;
+		x += e.movementX + dx;
+		y += e.movementY + dy;
+		if (probablyDragging) {
+			dx = 0;
+			dy = 0;
+		}
+	} else if (probablyDragging) {
+		dx += e.movementX;
+		dy += e.movementY;
+		if (Math.abs(dx) > 2 && Math.abs(dy) > 2) {
+			isDragging = true;
+		}
 	}
 }
 
 function handlePointerUp(e: PointerEvent) {
   ref?.releasePointerCapture(e.pointerId);
-	isDragging = false;
+	probablyDragging = false;
 	x = 0;
 	y = 0;
 }
@@ -60,9 +85,11 @@ $: draggingStyles = `
 
 <div
 	bind:this={ref}
+	on:click={handleClick}
 	on:pointerdown={handlePointerDown}
 	on:pointermove={handlePointerMove}
 	on:pointerup={handlePointerUp}
+	aria-hidden="true"
 	class={classNames.join(' ')}
 	style={draggingStyles}
 >

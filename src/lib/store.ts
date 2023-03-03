@@ -1,4 +1,4 @@
-import { writable } from 'svelte/store';
+import { writable, type Readable, type Subscriber, type Writable } from 'svelte/store';
 
 export type FoundationPileType = { type: "foundation", index: number };
 export type StockPileType = { type: "stock", status: "open" | "close"  };
@@ -11,16 +11,22 @@ export type CardPile =
 
 
 export interface CardType {
+  id: string;
 	rank: string;
 	suit: string;
   pile: CardPile;
+  isFaceDown: boolean;
+}
+
+export interface StoreProps extends Readable<CardType[]> {
+  onClosedStockPileClicked: () => void
 }
 
 const RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 const SUITS = ['♠️', '♥️', '♣️', '♦️'];
 
-export function createCards() {
-  const cards = [];
+export function createCards(): StoreProps {
+  const cards: CardType[] = [];
 
   for (let index = 0; index < 24; index++) {
     const rank = RANKS[index % 13];
@@ -32,7 +38,8 @@ export function createCards() {
       pile: {
         type: "stock",
         status: "close"
-      }
+      },
+      isFaceDown: true
     });
   }
 
@@ -52,13 +59,19 @@ export function createCards() {
         pile: {
           type: "tableau",
           index: index-1
-        }
+        },
+        isFaceDown: false
       });
     }
   }
-	const cardsStore = writable(cards);
+
+	const { subscribe, update } = writable<CardType[]>(cards);
+
+  function onClosedStockPileClicked() {
+    console.log("card received");
+  }
   
-	return cardsStore;
+	return { subscribe, onClosedStockPileClicked };
 }
 
 export function isCardInPile(card: CardType, pile: CardPile) {
