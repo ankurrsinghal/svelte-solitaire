@@ -16,14 +16,15 @@ const classNames = [
 	'items-center',
 	'text-3xl',
 	'justify-center',
-	'cursor-pointer',
 	isRed ? 'text-red-600' : 'text-black',
 	card.isFaceDown ? 'bg-red-500' : 'bg-white',
+	card.isFaceDown ? 'pointer-events-none': 'pointer-events-auto',
+	card.isFaceDown ? 'cursor-auto': 'cursor-pointer',
 ];
 
 let ref: HTMLDivElement | null = null;
 
-let isDragging = false;
+// let isDragging = false;
 let probablyDragging = false;
 let x = 0;
 let y = 0;
@@ -32,6 +33,8 @@ let dx = 0;
 let dy = 0;
 
 const store = getContext<StoreProps>('store');
+const isCardStartedDragging: any = getContext('isCardStartedDragging');
+const draggingCardPosition: any = getContext('draggingCardPosition');
 
 function handleClick() {
 	if (!isDragging) {
@@ -41,13 +44,18 @@ function handleClick() {
 	}
 }
 
-function handlePointerDown(e: PointerEvent) {
+function handlePointerDown() {
+	if (!card.isFaceDown) isCardStartedDragging.set(card);
+}
+
+function handlePointerDown2(e: PointerEvent) {
 	if (card.isFaceDown) return;
 	ref?.setPointerCapture(e.pointerId);
 	probablyDragging = true;
 }
 
 function handlePointerMove(e: PointerEvent) {
+	e.stopPropagation();
 	if (card.isFaceDown) return;
 	if (isDragging) {
 		x += e.movementX + dx;
@@ -73,24 +81,23 @@ function handlePointerUp(e: PointerEvent) {
 	y = 0;
 }
 
+$: isDragging = $isCardStartedDragging !== null && card.id === $isCardStartedDragging.id
+
 $: draggingStyles = `
 	position: relative;
-	transform: translate(${x}px, ${y}px);
+	transform: translate(${$draggingCardPosition.x}px, ${$draggingCardPosition.y}px);
 	box-shadow: ${ isDragging ? '3px 3px 8px rgba(0, 0, 0, 0.1)' : 'none' };
 	z-index: ${isDragging ? 1000 : 'initial'};
+	pointer-events: ${isDragging ? 'none' : 'auto'};
 `;
 
 </script>
 
 <div
 	bind:this={ref}
-	on:click={handleClick}
 	on:pointerdown={handlePointerDown}
-	on:pointermove={handlePointerMove}
-	on:pointerup={handlePointerUp}
-	aria-hidden="true"
 	class={classNames.join(' ')}
-	style={draggingStyles}
+	style={isDragging ? draggingStyles : ""}
 >
 	<!-- {#if !card.isFaceDown} -->
 	<span class="pointer-events-none select-none">{card.rank}</span>

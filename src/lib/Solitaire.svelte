@@ -1,16 +1,65 @@
 <script lang="ts">
-import { setContext } from "svelte";
-import Card from "./Card.svelte";
+import { setContext, onMount, onDestroy } from "svelte";
+  import { writable } from "svelte/store";
 import CardPile from "./CardPile.svelte";
 import { createCards } from "./store";
 
 const store = createCards();
 setContext('store', store);
 
+let canvasRef: HTMLDivElement | null = null;
+let rect: DOMRect | null = null;
+
+let observer: ResizeObserver | null = null;
+onMount(() => {
+  if (canvasRef !== null) {
+    observer = new ResizeObserver(() => {
+      rect = canvasRef!.getBoundingClientRect();
+    });
+    
+    observer.observe(canvasRef);
+  }
+});
+
+onDestroy(() => {
+  if (observer !== null) {
+    observer.disconnect();
+  }
+});
+
+const isCardStartedDragging = writable(null);
+const draggingCardPosition = writable({ x: 0, y: 0 });
+const hoveredPile = writable(null);
+
+setContext('isCardStartedDragging', isCardStartedDragging);
+setContext('draggingCardPosition', draggingCardPosition);
+setContext('hoveredPile', hoveredPile);
+
+function handlePointerMove(e: PointerEvent) {
+  if (rect !== null) {
+    if ($isCardStartedDragging !== null) {
+      draggingCardPosition.update(position => ({
+        x: position.x + e.movementX,
+        y: position.y + e.movementY
+      }));
+    }
+  }
+}
+
+function handlePointerUp(e: PointerEvent) {
+  if ($hoveredPile !== null) {
+    store.moveCardToPile($isCardStartedDragging, $hoveredPile);
+  }
+
+  hoveredPile.set(null);
+  isCardStartedDragging.set(null);
+  draggingCardPosition.set({ x: 0, y: 0 });
+}
+
 </script>
 
-<div class="bg-slate-100 h-screen w-screen overflow-hidden">
-  <div class="container mx-auto">
+<div class="bg-slate-100 h-screen w-screen overflow-hidden flex justify-center">
+  <div bind:this={canvasRef} on:pointermove={handlePointerMove} on:pointerup={handlePointerUp} class="container flex flex-col h-screen">
     <div class="grid grid-cols-7 mt-10">
       <CardPile pile={{ type: 'foundation', index: 0 }} />
       <CardPile pile={{ type: 'foundation', index: 1 }} />
@@ -20,7 +69,7 @@ setContext('store', store);
       <CardPile pile={{ type: 'stock', status: "open" }} />
       <CardPile pile={{ type: 'stock', status: "close" }} />
     </div>
-    <div class="grid grid-cols-7 mt-10">
+    <div class="grid grid-cols-7 mt-10 flex-1">
       <CardPile pile={{ type: 'tableau', index: 0 }} />
       <CardPile pile={{ type: 'tableau', index: 1 }} />
       <CardPile pile={{ type: 'tableau', index: 2 }} />

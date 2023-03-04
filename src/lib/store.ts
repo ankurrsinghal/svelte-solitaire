@@ -18,12 +18,72 @@ export interface CardType {
   isFaceDown: boolean;
 }
 
-export interface StoreProps extends Readable<CardType[]> {
-  onClosedStockPileClicked: () => void
+export interface StoreState {
+  cards: CardType[];
+  position: {
+    x: number;
+    y: number;
+  }
 }
 
+export interface StoreProps extends Readable<CardType[]> {
+  onClosedStockPileClicked: () => void;
+  moveCardToPile: (card: CardType, toPile: CardPile) => void;
+}
+
+const SPADES = '♠️';
+const HEARTS = '♥️';
+const CLUBS = '♣️';
+const DIAMONDS = '♦️';
+
 const RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-const SUITS = ['♠️', '♥️', '♣️', '♦️'];
+const SUITS = [SPADES, HEARTS, CLUBS, DIAMONDS];
+
+export function areCardsAntiSuit(cardA: CardType, cardB: CardType) {
+  switch (cardA.suit) {
+    case SPADES:
+    case CLUBS:
+      return cardB.suit === HEARTS || cardB.suit === DIAMONDS
+    case HEARTS:
+    case DIAMONDS:
+      return cardB.suit === SPADES || cardB.suit === CLUBS
+  }
+}
+
+export function getRankIndexOfCard(card: CardType) {
+  return RANKS.findIndex(rank => card.rank === rank);
+}
+
+export function isCardInPile(card: CardType, pile: CardPile) {
+  if (card.pile.type === pile.type) {
+    switch (card.pile.type) {
+      case "foundation":
+        return card.pile.index === (pile as FoundationPileType).index;
+      case "stock":
+        const val = card.pile.status === (pile as StockPileType).status;
+        return val;
+      case "tableau":
+        return card.pile.index === (pile as TableauPileType).index;
+    }
+  }
+}
+
+
+// class CardPile {
+//   cards: CardType[];
+
+//   constructor(cards: CardPile[]) {
+//     this.cards = cards;
+//   }
+// }
+
+// class Deck {
+
+// }
+
+// class Game {
+//   deck
+// }
 
 export function createCards(): StoreProps {
   const cards: CardType[] = [];
@@ -60,7 +120,7 @@ export function createCards(): StoreProps {
           type: "tableau",
           index: index-1
         },
-        isFaceDown: false,
+        isFaceDown: index2 !== index - 1,
       });
     }
   }
@@ -106,20 +166,46 @@ export function createCards(): StoreProps {
       }
     });
   }
-  
-	return { subscribe, onClosedStockPileClicked };
-}
 
-export function isCardInPile(card: CardType, pile: CardPile) {
-  if (card.pile.type === pile.type) {
-    switch (card.pile.type) {
-      case "foundation":
-        return card.pile.index === (pile as FoundationPileType).index;
-      case "stock":
-        const val = card.pile.status === (pile as StockPileType).status;
-        return val;
-      case "tableau":
-        return card.pile.index === (pile as TableauPileType).index;
+  function moveCardToPile(moveCard: CardType, toPile: CardPile) {
+    if (isCardInPile(moveCard, toPile)) return;
+
+    if (toPile.type === 'foundation') {
+      
+    } else if (toPile.type === 'tableau') {
+      update(cards => {
+        const cardInThisPile = cards.filter(card => isCardInPile(card, toPile));
+        const topCardOfThisPile = cardInThisPile[cardInThisPile.length - 1];
+  
+        function updateNow() {
+          const filteredCards = cards.filter(card => card.id !== moveCard.id);
+          const cardMoved = {
+            ...moveCard,
+            pile: {
+              ...toPile
+            }
+          }
+          return [...filteredCards, cardMoved];
+        }
+  
+        if (topCardOfThisPile) {
+          if (areCardsAntiSuit(topCardOfThisPile, moveCard)) {
+            if (getRankIndexOfCard(topCardOfThisPile) === getRankIndexOfCard(moveCard) + 1) {
+              console.log(topCardOfThisPile, moveCard);
+              return updateNow();
+            }
+          }
+        } else {
+          // empty pile
+          if (getRankIndexOfCard(moveCard) === 12) {
+            return updateNow();
+          }
+        }
+  
+        return cards;
+      });
     }
   }
+  
+	return { subscribe, onClosedStockPileClicked, moveCardToPile };
 }

@@ -11,7 +11,7 @@ export let pile: CardPile;
 const store = getContext<StoreProps>('store');
 $: cards = $store.filter(card => isCardInPile(card, pile));
 $: {
-	if (pile.type === "stock" && pile.status === "close") cards.reverse();
+	if ((pile.type === "stock" && pile.status === "close")) cards.reverse();
 }
 
 const isCascadable = pile.type === 'tableau';
@@ -21,13 +21,23 @@ function handleClick() {
 		store.onClosedStockPileClicked();
 	}
 }
+
+const isCardStartedDragging: any = getContext('isCardStartedDragging');
+const hoveredPile: any = getContext('hoveredPile');
+
+function handlePointerEnter() {
+	if ($isCardStartedDragging !== null) {
+		hoveredPile.set(pile);
+	}		
+}
+
 </script>
 
-<div class="relative" on:click={handleClick} aria-hidden="true">
+<div class="relative" on:click={handleClick} on:pointerenter={handlePointerEnter} aria-hidden="true">
 	{#if cards.length > 0}
 		{#each cards as card, index}
 			<div class="absolute" style={ isCascadable ? `top: ${index*40}px` : ""} >
-				<Card card={card}  />
+				<Card card={card} />
 			</div>
 		{/each}
 	{:else}
