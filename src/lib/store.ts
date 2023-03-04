@@ -54,6 +54,10 @@ export function getRankIndexOfCard(card: CardType) {
   return RANKS.findIndex(rank => card.rank === rank);
 }
 
+export function getSuitIndexOfCard(card: CardType) {
+  return SUITS.findIndex(suit => card.suit === suit);
+}
+
 export function isCardInPile(card: CardType, pile: CardPile) {
   if (card.pile.type === pile.type) {
     switch (card.pile.type) {
@@ -171,7 +175,33 @@ export function createCards(): StoreProps {
     if (isCardInPile(moveCard, toPile)) return;
 
     if (toPile.type === 'foundation') {
-      
+      update(cards => {
+        function updateNow() {
+          const filteredCards = cards.filter(card => card.id !== moveCard.id);
+          const cardMoved = {
+            ...moveCard,
+            pile: {
+              ...toPile
+            }
+          }
+          return [...filteredCards, cardMoved];
+        }
+
+        if (getSuitIndexOfCard(moveCard) === toPile.index) {
+          const cardInThisPile = cards.filter(card => isCardInPile(card, toPile));
+          const topCardOfThisPile = cardInThisPile[cardInThisPile.length - 1];
+          if (topCardOfThisPile) {
+            if (getRankIndexOfCard(topCardOfThisPile) === getRankIndexOfCard(moveCard) - 1) {
+              return updateNow();
+            }
+          } else {
+            if (getRankIndexOfCard(moveCard) === 0) {
+              return updateNow();
+            }
+          }
+        }
+        return cards;
+      });
     } else if (toPile.type === 'tableau') {
       update(cards => {
         const cardInThisPile = cards.filter(card => isCardInPile(card, toPile));
@@ -206,6 +236,8 @@ export function createCards(): StoreProps {
       });
     }
   }
+
+  
   
 	return { subscribe, onClosedStockPileClicked, moveCardToPile };
 }
