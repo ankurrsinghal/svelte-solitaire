@@ -1,11 +1,13 @@
 import { writable, type Readable, type Subscriber, type Writable } from 'svelte/store';
 
 export type FoundationPileType = { type: "foundation", index: number };
-export type StockPileType = { type: "stock", status: "open" | "close"  };
+export type WastePileType = { type: "waste" };
+export type StockPileType = { type: "stock" };
 export type TableauPileType = { type: "tableau", index: number };
 
 export type CardPile = 
   | FoundationPileType
+  | WastePileType
   | StockPileType
   | TableauPileType
 
@@ -26,9 +28,14 @@ export interface StoreState {
   }
 }
 
+function topCard(cards: CardType[]) {
+  return cards.at(cards.length - 1);
+}
+
 export interface StoreProps extends Readable<CardType[]> {
   onClosedStockPileClicked: () => void;
   moveCardToPile: (card: CardType, toPile: CardPile) => void;
+  pushToWastePileFromStockPile: () => void;
 }
 
 const SPADES = '♠️';
@@ -58,18 +65,37 @@ export function getSuitIndexOfCard(card: CardType) {
   return SUITS.findIndex(suit => card.suit === suit);
 }
 
-export function isCardInPile(card: CardType, pile: CardPile) {
+export function isCardInPile(card: CardType, pile: CardPile): boolean {
   if (card.pile.type === pile.type) {
     switch (card.pile.type) {
       case "foundation":
         return card.pile.index === (pile as FoundationPileType).index;
+      case "waste":
+        return pile.type === "waste";
       case "stock":
-        const val = card.pile.status === (pile as StockPileType).status;
-        return val;
+        return pile.type === "stock";
       case "tableau":
         return card.pile.index === (pile as TableauPileType).index;
     }
   }
+
+  return false;
+}
+
+export const STOCK_PILE: StockPileType = {
+  type: "stock"
+};
+
+export const WASTE_PILE: WastePileType = {
+  type: "waste"
+};
+
+export function isCardInStockPile(card: CardType) {
+  return isCardInPile(card, STOCK_PILE);
+}
+
+export function isCardInWastePile(card: CardType) {
+  return isCardInPile(card, WASTE_PILE);
 }
 
 
@@ -99,10 +125,7 @@ export function createCards(): StoreProps {
       id: `${rank}-${suit}`,
       rank,
       suit,
-      pile: {
-        type: "stock",
-        status: "close"
-      },
+      pile: STOCK_PILE,
       isFaceDown: true
     });
   }
@@ -237,7 +260,52 @@ export function createCards(): StoreProps {
     }
   }
 
+  function selector(cards: CardType[], fn: (card: CardType) => boolean) {
+    return cards.filter(fn);
+  }
+
+  function cardsInStockPile(cards: CardType[]) {
+    return selector(cards, isCardInStockPile);
+  }
+
+  function cardsInWastePile(cards: CardType[]) {
+    return selector(cards, isCardInWastePile);
+  }
+
+  function pushToWastePileFromStockPile() {
+    update(cards => {
+      const cardsInStockPile = selector(cards, isCardInStockPile);
+      const cardToBeMoved = topCard(cardsInStockPile);
+      if (cardToBeMoved) {
+        return cards.map(card => {
+          if (card.id === cardToBeMoved.id) {
+            console.log("moving to waste");
+            return {
+              ...cardToBeMoved,
+              isFaceDown: false,
+              pile: WASTE_PILE
+            }
+          }
+          return card;
+        });
+      } else {
+        // empty waste pile
+        // and move all cards to 
+        // stock pile
+        return cards.map(card => {
+          if (isCardInWastePile(card)) {
+            return {
+              ...card,
+              isFaceDown: true,
+              pile: STOCK_PILE
+            }
+          }
+
+          return card;
+        });
+      }
+    });
+  }
   
-  
-	return { subscribe, onClosedStockPileClicked, moveCardToPile };
+	return { subscribe, onClosedStockPileClicked, moveCardToPile, pushToWastePileFromStockPile };
 }

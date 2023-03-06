@@ -4,9 +4,9 @@ import type { CardType, StoreProps } from './store';
 
 export let card: CardType;
 
-const isRed = card.suit === '♦️' || card.suit === '♥️';
+$: isRed = card.suit === '♦️' || card.suit === '♥️';
 
-const classNames = [
+$: classNames = [
 	'position',
 	'w-24',
 	'h-36',
