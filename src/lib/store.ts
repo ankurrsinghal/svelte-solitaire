@@ -36,6 +36,7 @@ export interface StoreProps extends Readable<CardType[]> {
   onClosedStockPileClicked: () => void;
   moveCardToPile: (card: CardType, toPile: CardPile) => void;
   pushToWastePileFromStockPile: () => void;
+  openCardInTableauPile: (index: number) => void;
 }
 
 const SPADES = '♠️';
@@ -310,6 +311,31 @@ export function createCards(): StoreProps {
       }
     });
   }
+
+  function openCardInTableauPile(index: number) {
+    update(cards => {
+      const cardsInThisTableau = cards.filter(card => isCardInTableauPileOfIndex(card, index));
+      const closedCards = cardsInThisTableau.filter(card => card.isFaceDown);
+      if (cardsInThisTableau.length === closedCards.length) {
+        const cardToBeOpened = topCard(closedCards);
+        if (cardToBeOpened) {
+          return cards.map(card => {
+            if (card.id === cardToBeOpened.id) {
+              return {
+                ...cardToBeOpened,
+                isFaceDown: false
+              }
+            }
+            return card;
+          });
+        }
+      } else {
+        throw new Error("You cannot open this card!");
+      }
+
+      return cards;
+    });
+  }
   
-	return { subscribe, onClosedStockPileClicked, moveCardToPile, pushToWastePileFromStockPile };
+	return { subscribe, onClosedStockPileClicked, moveCardToPile, pushToWastePileFromStockPile, openCardInTableauPile };
 }

@@ -9,7 +9,9 @@
   export let index: number;
   
   const store = getContext<StoreProps>('store');
-  $: cards = $store.filter(card => isCardInTableauPileOfIndex(card, index));
+  $: cardsInThisPile = $store.filter(card => isCardInTableauPileOfIndex(card, index));
+  $: openedCards = cardsInThisPile.filter(card => !card.isFaceDown)
+  $: closedCards = cardsInThisPile.filter(card => card.isFaceDown)
     
   function handleClick() {
     
@@ -20,20 +22,34 @@
   
   function handlePointerEnter() {
     if ($isCardStartedDragging !== null) {
-      hoveredPile.set(pile);
+      hoveredPile.set(index);
     }		
+  }
+
+  function handleCloseCardClick(cardIndex: number) {
+    if (openedCards.length === 0) {
+      if (cardIndex === closedCards.length - 1) {
+        store.openCardInTableauPile(index);
+      }
+    }
   }
   
   </script>
   
   <div class="relative" on:click={handleClick} on:pointerenter={handlePointerEnter} aria-hidden="true">
-    {#if cards.length > 0}
-      {#each cards as card, index}
-        <div class="absolute" style="top: {index*40}px">
+    <NoCardPile />
+    {#if closedCards.length > 0}
+      {#each closedCards as card, index}
+        <div class="absolute cursor-pointer" style="top: {(index)*20}px" on:click={() => handleCloseCardClick(index)} aria-hidden="true">
           <Card card={card} />
         </div>
       {/each}
-    {:else}
-    <NoCardPile />
+    {/if}
+    {#if openedCards.length > 0}
+      {#each openedCards as card, index}
+        <div class="absolute" style="top: {(index + closedCards.length)*20}px">
+          <Card card={card} />
+        </div>
+      {/each}
     {/if}
   </div>

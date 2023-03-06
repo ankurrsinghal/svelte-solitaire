@@ -12,10 +12,6 @@ function handleClick() {
   console.log("waste piel click");
 }
 
-$: {
-  console.log(cards);
-}
-
 </script>
 
 <div class="relative" on:click={handleClick} aria-hidden="true">

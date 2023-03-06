@@ -16,6 +16,7 @@ $: classNames = [
 	'items-center',
 	'text-3xl',
 	'justify-center',
+	'border border-black',
 	isRed ? 'text-red-600' : 'text-black',
 	card.isFaceDown ? 'bg-red-500' : 'bg-white',
 	card.isFaceDown ? 'pointer-events-none': 'pointer-events-auto',
@@ -99,8 +100,8 @@ $: draggingStyles = `
 	class={classNames.join(' ')}
 	style={isDragging ? draggingStyles : ""}
 >
-	<!-- {#if !card.isFaceDown} -->
-	<span class="pointer-events-none select-none">{card.rank}</span>
-	<span class="pointer-events-none select-none">{card.suit}</span>
-	<!-- {/if} -->
+	{#if !card.isFaceDown}
+		<span class="pointer-events-none select-none">{card.rank}</span>
+		<span class="pointer-events-none select-none">{card.suit}</span>
+	{/if}
 </div>

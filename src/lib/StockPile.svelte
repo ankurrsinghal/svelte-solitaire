@@ -14,7 +14,7 @@ function handleClick() {
 
 </script>
 
-<div class="relative" on:click={handleClick} aria-hidden="true">
+<div class="relative cursor-pointer" on:click={handleClick} aria-hidden="true">
   {#if cards.length > 0}
     {#each cards as card, index}
       <div class="absolute">
