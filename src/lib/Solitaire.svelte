@@ -4,6 +4,7 @@ import { setContext, onMount, onDestroy } from "svelte";
 import CardPile from "./CardPile.svelte";
   import StockPile from "./StockPile.svelte";
 import { createCards } from "./store";
+  import TableauPile from "./TableauPile.svelte";
   import WastePile from "./WastePile.svelte";
 
 const store = createCards();
@@ -72,13 +73,13 @@ function handlePointerUp(e: PointerEvent) {
       <StockPile />
     </div>
     <div class="grid grid-cols-7 mt-10 flex-1">
-      <CardPile pile={{ type: 'tableau', index: 0 }} />
-      <CardPile pile={{ type: 'tableau', index: 1 }} />
-      <CardPile pile={{ type: 'tableau', index: 2 }} />
-      <CardPile pile={{ type: 'tableau', index: 3 }} />
-      <CardPile pile={{ type: 'tableau', index: 4 }} />
-      <CardPile pile={{ type: 'tableau', index: 5 }} />
-      <CardPile pile={{ type: 'tableau', index: 6 }} />
+      <TableauPile index={0} />
+      <TableauPile index={1} />
+      <TableauPile index={2} />
+      <TableauPile index={3} />
+      <TableauPile index={4} />
+      <TableauPile index={5} />
+      <TableauPile index={6} />
     </div>
   </div>
 </div>

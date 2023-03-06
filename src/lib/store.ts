@@ -98,6 +98,10 @@ export function isCardInWastePile(card: CardType) {
   return isCardInPile(card, WASTE_PILE);
 }
 
+export function isCardInTableauPileOfIndex(card: CardType, index: number) {
+  return isCardInPile(card, { type: "tableau", index });
+}
+
 
 // class CardPile {
 //   cards: CardType[];
