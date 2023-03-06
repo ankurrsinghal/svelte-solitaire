@@ -103,6 +103,10 @@ export function isCardInTableauPileOfIndex(card: CardType, index: number) {
   return isCardInPile(card, { type: "tableau", index });
 }
 
+export function isCardInFoudnationPileOfIndex(card: CardType, index: number) {
+  return isCardInPile(card, { type: "foundation", index });
+}
+
 
 // class CardPile {
 //   cards: CardType[];
@@ -249,7 +253,6 @@ export function createCards(): StoreProps {
         if (topCardOfThisPile) {
           if (areCardsAntiSuit(topCardOfThisPile, moveCard)) {
             if (getRankIndexOfCard(topCardOfThisPile) === getRankIndexOfCard(moveCard) + 1) {
-              console.log(topCardOfThisPile, moveCard);
               return updateNow();
             }
           }
@@ -267,14 +270,6 @@ export function createCards(): StoreProps {
 
   function selector(cards: CardType[], fn: (card: CardType) => boolean) {
     return cards.filter(fn);
-  }
-
-  function cardsInStockPile(cards: CardType[]) {
-    return selector(cards, isCardInStockPile);
-  }
-
-  function cardsInWastePile(cards: CardType[]) {
-    return selector(cards, isCardInWastePile);
   }
 
   function pushToWastePileFromStockPile() {

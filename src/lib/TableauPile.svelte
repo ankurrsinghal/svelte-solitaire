@@ -22,7 +22,7 @@
   
   function handlePointerEnter() {
     if ($isCardStartedDragging !== null) {
-      hoveredPile.set(index);
+      hoveredPile.set({ type: "tableau", index });
     }		
   }
 

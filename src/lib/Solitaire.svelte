@@ -2,6 +2,7 @@
 import { setContext, onMount, onDestroy } from "svelte";
   import { writable } from "svelte/store";
 import CardPile from "./CardPile.svelte";
+  import FoundationPile from "./FoundationPile.svelte";
   import StockPile from "./StockPile.svelte";
 import { createCards } from "./store";
   import TableauPile from "./TableauPile.svelte";
@@ -64,10 +65,10 @@ function handlePointerUp(e: PointerEvent) {
 <div class="bg-slate-100 h-screen w-screen overflow-hidden flex justify-center">
   <div bind:this={canvasRef} on:pointermove={handlePointerMove} on:pointerup={handlePointerUp} class="container flex flex-col h-screen">
     <div class="grid grid-cols-7 mt-10">
-      <CardPile pile={{ type: 'foundation', index: 0 }} />
-      <CardPile pile={{ type: 'foundation', index: 1 }} />
-      <CardPile pile={{ type: 'foundation', index: 2 }} />
-      <CardPile pile={{ type: 'foundation', index: 3 }} />
+      <FoundationPile index={0} />
+      <FoundationPile index={1} />
+      <FoundationPile index={2} />
+      <FoundationPile index={3} />
       <div />
       <WastePile />
       <StockPile />
