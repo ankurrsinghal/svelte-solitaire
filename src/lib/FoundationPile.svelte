@@ -8,24 +8,21 @@
   
   const store = getContext<StoreProps>('store');
   $: cards = $store.filter(card => isCardInFoudnationPileOfIndex(card, index));
-  
-  const isCardStartedDragging: any = getContext('isCardStartedDragging');
-  const hoveredPile: any = getContext('hoveredPile');
-  
-  function handlePointerEnter() {
-    if ($isCardStartedDragging !== null) {
-      hoveredPile.set({ type: "foundation", index });
-    }
+
+  function handleHover() {
+    console.log("foundation");
   }
+
+  const draggingSession = getContext('draggingSession');
   
   </script>
   
-  <div class="relative" on:pointerenter={handlePointerEnter} aria-hidden="true">
+  <div class="relative" on:mouseover={handleHover} aria-hidden="true">
     <NoCardPile />
     {#if cards.length > 0}
       {#each cards as card, index}
         <div class="absolute" style="top: {index*40}px" >
-          <Card card={card} />
+          <Card card={card} hidden={$draggingSession !== null && $draggingSession.findIndex(c => c.id === card.id) !== -1} />
         </div>
       {/each}
     {/if}

@@ -1,11 +1,12 @@
 <script lang="ts">
+  import { getContext } from "svelte";
+
+
 const classNames = [
 	'position',
 	'border',
 	'border-1',
 	'border-black',
-	'w-24',
-	'h-36',
 	'rounded-md',
 	'flex',
 	'flex-col',
@@ -14,6 +15,13 @@ const classNames = [
 	'justify-center',
 	'pointer-events-none',
 ];
+
+const cardWidth = getContext('cardWidth');
+const cardHeight = getContext('cardHeight');
 </script>
 
-<div class={classNames.join(' ')}></div>
+<div
+	style:width="{cardWidth}px"
+	style:height="{cardHeight}px"
+	class={classNames.join(' ')}>
+</div>

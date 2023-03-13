@@ -9,22 +9,11 @@
   export let index: number;
   
   const store = getContext<StoreProps>('store');
+  const draggingSession = getContext('draggingSession');
+
   $: cardsInThisPile = $store.filter(card => isCardInTableauPileOfIndex(card, index));
   $: openedCards = cardsInThisPile.filter(card => !card.isFaceDown)
   $: closedCards = cardsInThisPile.filter(card => card.isFaceDown)
-    
-  function handleClick() {
-    
-  }
-  
-  const isCardStartedDragging: any = getContext('isCardStartedDragging');
-  const hoveredPile: any = getContext('hoveredPile');
-  
-  function handlePointerEnter() {
-    if ($isCardStartedDragging !== null) {
-      hoveredPile.set({ type: "tableau", index });
-    }		
-  }
 
   function handleCloseCardClick(cardIndex: number) {
     if (openedCards.length === 0) {
@@ -36,7 +25,7 @@
   
   </script>
   
-  <div class="relative" on:click={handleClick} on:pointerenter={handlePointerEnter} aria-hidden="true">
+  <div class="relative" aria-hidden="true">
     <NoCardPile />
     {#if closedCards.length > 0}
       {#each closedCards as card, index}
@@ -48,7 +37,7 @@
     {#if openedCards.length > 0}
       {#each openedCards as card, index}
         <div class="absolute" style="top: {(index + closedCards.length)*20}px">
-          <Card card={card} />
+          <Card card={card} hidden={$draggingSession !== null && $draggingSession.findIndex(c => c.id === card.id) !== -1} />
         </div>
       {/each}
     {/if}

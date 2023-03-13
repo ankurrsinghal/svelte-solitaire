@@ -12,13 +12,15 @@ function handleClick() {
   console.log("waste piel click");
 }
 
+const draggingSession = getContext('draggingSession');
+
 </script>
 
 <div class="relative" on:click={handleClick} aria-hidden="true">
   {#if cards.length > 0}
     {#each cards as card, index}
       <div class="absolute">
-        <Card card={card} />
+        <Card card={card} hidden={$draggingSession !== null && $draggingSession.findIndex(c => c.id === card.id) !== -1} />
       </div>
     {/each}
   {/if}
