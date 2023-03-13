@@ -1,5 +1,6 @@
 <h1 align="center">Svelte Solitaire</h1>
 <p align="center">
+    <img src="https://svelte-solitaire.singhalankur.com/screenshot.png">
 </p>
 
 <h2 align="center"><a  href="https://svelte-solitaire.singhalankur.com">Live Demo</a></h2>
