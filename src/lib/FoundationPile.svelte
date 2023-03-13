@@ -21,7 +21,7 @@
     <NoCardPile />
     {#if cards.length > 0}
       {#each cards as card, index}
-        <div class="absolute" style="top: {index*40}px" >
+        <div class="absolute" style="top: 0px" >
           <Card card={card} hidden={$draggingSession !== null && $draggingSession.findIndex(c => c.id === card.id) !== -1} />
         </div>
       {/each}

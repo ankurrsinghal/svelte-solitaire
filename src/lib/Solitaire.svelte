@@ -12,9 +12,9 @@ import { windowSizeStore } from 'svelte-legos';
 const size = windowSizeStore()
 
 const MAX_CANVAS_WIDTH = 1000;
-const MAX_CARD_WIDTH = 125;
+const MAX_CARD_WIDTH = 100;
 const N_TABLEAU_COLUMNS = 7;
-const CARD_ASPECT_RATIO = 1.5;
+const CARD_ASPECT_RATIO = 1.4;
 
 $: canvasWidth = Math.min(MAX_CANVAS_WIDTH, $size.width);
 $: columnSpacing = (canvasWidth - MAX_CARD_WIDTH * (N_TABLEAU_COLUMNS)) / (N_TABLEAU_COLUMNS - 1);
@@ -79,8 +79,7 @@ function handlePointerMove(e: PointerEvent) {
       if (probableIndex < 7 && probableIndex >= 0) {
         if ((clientX - tableauRectX) < cardWidth + (probableIndex * (cardWidth + columnSpacing))) {
           // probableIndex is correct foundation index
-          const newPile = { type: "foundation", index: probableIndex };
-          if (probableIndex !== $isCardStartedDragging.pile.index && !($hoveredPile !== null && $hoveredPile.type === 'tableau' && $hoveredPile.index === probableIndex)) {
+          if (probableIndex !== $isCardStartedDragging.pile.index) {
             hoveredPile.set({ type: "tableau", index: probableIndex })
           }
         }
@@ -99,7 +98,11 @@ function handlePointerMove(e: PointerEvent) {
 
 function handlePointerUp(e: PointerEvent) {
   if ($hoveredPile !== null) {
-    store.moveCardToPile($isCardStartedDragging, $hoveredPile);
+    if ($draggingSession.length > 1 && $hoveredPile.type === "tableau") {
+      store.moveCardsAmongTableau($draggingSession, $hoveredPile.index);
+    } else {
+      store.moveCardToPile($draggingSession[0], $hoveredPile);
+    }
   }
 
   hoveredPile.set(null);
@@ -112,9 +115,9 @@ $: {
   if ($isCardStartedDragging !== null) {
     const pileType = $isCardStartedDragging.pile.type;
     if (pileType === "tableau") {
-      const cardsInThisPile = $store.filter(card => isCardInPile(card, $isCardStartedDragging.pile));
-      const indexOfDraggedCard = cardsInThisPile.findIndex(card => card.id === $isCardStartedDragging.id);
-      draggingSession.set(cardsInThisPile.slice(indexOfDraggedCard))
+      const openCardsInThisPile = $store.filter(card => isCardInPile(card, $isCardStartedDragging.pile) && !card.isFaceDown);
+      const indexOfDraggedCard = openCardsInThisPile.findIndex(card => card.id === $isCardStartedDragging.id);
+      draggingSession.set(openCardsInThisPile.slice(indexOfDraggedCard))
     } else if (pileType === "foundation") {
       draggingSession.set([$isCardStartedDragging])
     } else if (pileType === "waste") {
@@ -122,8 +125,6 @@ $: {
     }
   }
 }
-
-$: console.log($hoveredPile);
 
 $: draggingStyles = $pointerEvent !== null ? `
   top: 0;
@@ -164,8 +165,8 @@ $: draggingStyles = $pointerEvent !== null ? `
     {#if $draggingSession && $draggingSession.length > 0}
       <div style={draggingStyles}>
         {#each $draggingSession as card, index}
-          <div class="absolute" style="top: {(index)*20}px">
-            <Card card={card} />
+          <div class="absolute" style="top: {(index)*30}px">
+            <Card isTopPileOpenCard={index === $draggingSession.length - 1} card={card} />
           </div>
         {/each}
       </div>

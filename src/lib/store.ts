@@ -34,6 +34,7 @@ function topCard(cards: CardType[]) {
 
 export interface StoreProps extends Readable<CardType[]> {
   onClosedStockPileClicked: () => void;
+  moveCardsAmongTableau: (cards: CardType[], index: number) => void;
   moveCardToPile: (card: CardType, toPile: CardPile) => void;
   pushToWastePileFromStockPile: () => void;
   openCardInTableauPile: (index: number) => void;
@@ -124,19 +125,25 @@ export function isCardInFoudnationPileOfIndex(card: CardType, index: number) {
 //   deck
 // }
 
-export function createCards(): StoreProps {
-  const cards: CardType[] = [];
+function getCards() {
+  const cards: any[] = [];
+  SUITS.forEach((suit) => {
+    RANKS.forEach((rank) => {
+      cards.push({ rank, suit, id: `${rank}-${suit}`, });
+    });
+  });
+
+  for (let index = 0; index < cards.length; index++) {
+    const randomIndex = Math.floor(Math.random() * 52);
+    [cards[index], cards[randomIndex]] = [
+      cards[randomIndex],
+      cards[index],
+    ];
+  }
 
   for (let index = 0; index < 24; index++) {
-    const rank = RANKS[index % 13];
-    const suit = SUITS[Math.floor(index / 13)];
-    cards.push({
-      id: `${rank}-${suit}`,
-      rank,
-      suit,
-      pile: STOCK_PILE,
-      isFaceDown: true
-    });
+    cards[index].pile = STOCK_PILE;
+    cards[index].isFaceDown = true;
   }
 
   function sumN(n: number) {
@@ -146,22 +153,21 @@ export function createCards(): StoreProps {
   for (let index = 1; index <= 7; index++) {
     for (let index2 = 0; index2 < index; index2++) {
       const cardIndex = 23 + sumN(index) + index2 + 1;
-      const rank = RANKS[cardIndex % 13];
-      const suit = SUITS[Math.floor(cardIndex / 13)];
-      cards.push({
-        id: `${rank}-${suit}`,
-        rank,
-        suit,
-        pile: {
-          type: "tableau",
-          index: index-1
-        },
-        isFaceDown: index2 !== index - 1,
-      });
+      cards[cardIndex].pile = {
+        type: "tableau",
+        index: index-1
+      };
+      cards[cardIndex].isFaceDown = index2 !== index - 1;
     }
   }
 
-	const { subscribe, update, set } = writable<CardType[]>(cards);
+  // console.log(cards);
+
+  return cards;
+}
+
+export function createCards(): StoreProps {
+	const { subscribe, update, set } = writable<CardType[]>(getCards());
 
   function onClosedStockPileClicked() {
     update(cards => {
@@ -200,6 +206,41 @@ export function createCards(): StoreProps {
           return card;
         });
       }
+    });
+  }
+
+  function moveCardsAmongTableau(movingCards: CardType[], moveIndex: number) {
+    update(cards => {
+      const cardInThisPile = cards.filter(card => isCardInTableauPileOfIndex(card, moveIndex));
+      const topCardOfThisPile = cardInThisPile[cardInThisPile.length - 1];
+
+      function updateNow() {
+        const filteredCards = cards.filter(card => !movingCards.some(c => c.id === card.id));
+        const cardsMoved = movingCards.map(card => ({
+          ...card,
+          pile: {
+            ...card.pile,
+            index: moveIndex
+          }
+        }));
+        return [...filteredCards, ...cardsMoved];
+      }
+
+      const topCardOfMovingPile = movingCards[0];
+      if (topCardOfThisPile) {
+        if (areCardsAntiSuit(topCardOfThisPile, topCardOfMovingPile)) {
+          if (getRankIndexOfCard(topCardOfThisPile) === getRankIndexOfCard(topCardOfMovingPile) + 1) {
+            return updateNow();
+          }
+        }
+      } else {
+        // empty pile
+        if (getRankIndexOfCard(topCardOfMovingPile) === 12) {
+          return updateNow();
+        }
+      }
+
+      return cards;
     });
   }
 
@@ -332,5 +373,5 @@ export function createCards(): StoreProps {
     });
   }
   
-	return { subscribe, onClosedStockPileClicked, moveCardToPile, pushToWastePileFromStockPile, openCardInTableauPile };
+	return { subscribe, moveCardsAmongTableau, onClosedStockPileClicked, moveCardToPile, pushToWastePileFromStockPile, openCardInTableauPile };
 }

@@ -23,21 +23,22 @@
     }
   }
   
+
   </script>
   
   <div class="relative" aria-hidden="true">
     <NoCardPile />
     {#if closedCards.length > 0}
       {#each closedCards as card, index}
-        <div class="absolute cursor-pointer" style="top: {(index)*20}px" on:click={() => handleCloseCardClick(index)} aria-hidden="true">
+        <div class="absolute cursor-pointer" style="top: {(index)*30}px" on:click={() => handleCloseCardClick(index)} aria-hidden="true">
           <Card card={card} />
         </div>
       {/each}
     {/if}
     {#if openedCards.length > 0}
       {#each openedCards as card, index}
-        <div class="absolute" style="top: {(index + closedCards.length)*20}px">
-          <Card card={card} hidden={$draggingSession !== null && $draggingSession.findIndex(c => c.id === card.id) !== -1} />
+        <div class="absolute" style="top: {(index + closedCards.length)*30}px">
+          <Card isTopPileOpenCard={index === openedCards.length - 1} card={card} hidden={$draggingSession !== null && $draggingSession.findIndex(c => c.id === card.id) !== -1} />
         </div>
       {/each}
     {/if}
