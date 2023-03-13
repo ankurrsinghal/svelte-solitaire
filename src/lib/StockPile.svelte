@@ -15,12 +15,10 @@ function handleClick() {
 </script>
 
 <div class="relative cursor-pointer" on:click={handleClick} aria-hidden="true">
-  {#if cards.length > 0}
-    {#each cards as card, index}
-      <div class="absolute">
-        <Card card={card} />
-      </div>
-    {/each}
-  {/if}
-  <NoCardPile />
+  <div class="absolute top-0">
+    <NoCardPile bg="bg-red-500">{cards.length}</NoCardPile>
+  </div>  
+  <div class="absolute top-0">
+    <NoCardPile />
+  </div>
 </div>

@@ -2,7 +2,7 @@
   import { getContext } from 'svelte';
   import Card from './Card.svelte';
   import NoCardPile from './NoCardPile.svelte';
-  import { isCardInFoudnationPileOfIndex, isCardInPile, type CardPile, type CardType, type StoreProps } from './store';
+  import { isCardInFoudnationPileOfIndex, isCardInPile, SUITS, type CardPile, type CardType, type StoreProps } from './store';
   
   export let index: number;
   
@@ -18,7 +18,7 @@
   </script>
   
   <div class="relative" on:mouseover={handleHover} aria-hidden="true">
-    <NoCardPile />
+    <NoCardPile>{SUITS[index]}</NoCardPile>
     {#if cards.length > 0}
       {#each cards as card, index}
         <div class="absolute" style="top: 0px" >

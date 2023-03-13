@@ -95,9 +95,11 @@ $: contentClass = `
 	flex
 	${isTopPileOpenCard ? 'flex-col' : ''}
 	${isTopPileOpenCard ? 'items-center' : ''}
-	${isTopPileOpenCard ? 'text-3xl' : 'text-xl'}
+	${isTopPileOpenCard ? 'text-3xl' : 'text-lg'}
+	${isTopPileOpenCard ? 'space-y-0' : 'space-x-2'}
 	justify-center
 	pointer-events-none
+	font-mono
 `
 </script>
 

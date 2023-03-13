@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { getContext } from "svelte";
+import { getContext } from "svelte";
 
+export let bg: string = '';
 
 const classNames = [
 	'position',
@@ -11,9 +12,11 @@ const classNames = [
 	'flex',
 	'flex-col',
 	'items-center',
-	'text-3xl',
 	'justify-center',
 	'pointer-events-none',
+	bg,
+	bg === '' ? 'text-black' : 'text-white',
+	bg === '' ? 'text-2xl' : 'text-sm',
 ];
 
 const cardWidth = getContext('cardWidth');
@@ -24,4 +27,5 @@ const cardHeight = getContext('cardHeight');
 	style:width="{cardWidth}px"
 	style:height="{cardHeight}px"
 	class={classNames.join(' ')}>
+	<slot />
 </div>
