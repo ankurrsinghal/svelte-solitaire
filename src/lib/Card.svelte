@@ -29,6 +29,11 @@ function handleClick() {
 	}
 }
 
+function handleDoubleClick() {
+	console.log("double click");
+	store.handleCardDoubleClick(card);
+}
+
 function handlePointerDown(e: PointerEvent) {
 	e.preventDefault();
 	e.stopPropagation();
@@ -64,6 +69,7 @@ $: contentClass = `
 
 <div
 	on:pointerdown={handlePointerDown}
+	on:dblclick={handleDoubleClick}
 	class={classNames.join(' ')}
 	style:opacity
 	style:width="{cardWidth}px"

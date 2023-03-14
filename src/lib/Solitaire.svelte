@@ -2,7 +2,6 @@
 import { setContext, onMount, onDestroy } from "svelte";
 import { writable } from "svelte/store";
 import Card from "./Card.svelte";
-import CardPile from "./CardPile.svelte";
 import FoundationPile from "./FoundationPile.svelte";
 import StockPile from "./StockPile.svelte";
 import { createCards, isCardInPile } from "./store";
@@ -57,8 +56,6 @@ function handlePointerMove(e: PointerEvent) {
 
     const draggingCardCenterX = clientX - $pointerEvent.offsetX + cardWidth / 2;
     const draggingCardY = clientY - $pointerEvent.offsetY + cardHeight / 2;
-
-    console.log(draggingCardCenterX, draggingCardY);
 
     if (draggingCardY > foundationRectY && draggingCardY < foundationRectY + cardHeight) {
       const probableIndex = Math.floor((draggingCardCenterX - foundationRectX) / ((cardWidth) + (columnSpacing)));

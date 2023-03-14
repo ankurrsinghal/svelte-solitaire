@@ -9,15 +9,11 @@
   const store = getContext<StoreProps>('store');
   $: cards = $store.filter(card => isCardInFoudnationPileOfIndex(card, index));
 
-  function handleHover() {
-    console.log("foundation");
-  }
-
   const draggingSession = getContext('draggingSession');
   
   </script>
   
-  <div class="relative" on:mouseover={handleHover} aria-hidden="true">
+  <div class="relative">
     <NoCardPile>{SUITS[index]}</NoCardPile>
     {#if cards.length > 0}
       {#each cards as card, index}
