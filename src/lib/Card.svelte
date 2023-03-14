@@ -1,5 +1,6 @@
 <script lang="ts">
   import { getContext } from 'svelte';
+  import BackCard from './BackCard.svelte';
 import type { CardType, StoreProps } from './store';
 
 export let card: CardType;
@@ -9,25 +10,11 @@ export let isTopPileOpenCard: boolean = true;
 $: isRed = card.suit === '♦️' || card.suit === '♥️';
 
 $: classNames = [
-	'position',
-	'rounded-md',
+	'relative',
 	'text-3xl',
-	'border border-black',
-	isRed ? 'text-red-600' : 'text-black',
-	card.isFaceDown ? 'bg-red-500' : 'bg-white',
 	card.isFaceDown ? 'pointer-events-none': 'pointer-events-auto',
 	card.isFaceDown ? 'cursor-auto': 'cursor-pointer',
 ];
-
-let ref: HTMLDivElement | null = null;
-
-// let isDragging = false;
-let probablyDragging = false;
-let x = 0;
-let y = 0;
-
-let dx = 0;
-let dy = 0;
 
 const store = getContext<StoreProps>('store');
 const isCardStartedDragging: any = getContext('isCardStartedDragging');
@@ -49,39 +36,6 @@ function handlePointerDown(e: PointerEvent) {
 	if (!card.isFaceDown) isCardStartedDragging.set(card);
 }
 
-function handlePointerDown2(e: PointerEvent) {
-	if (card.isFaceDown) return;
-	ref?.setPointerCapture(e.pointerId);
-	probablyDragging = true;
-}
-
-function handlePointerMove(e: PointerEvent) {
-	e.stopPropagation();
-	if (card.isFaceDown) return;
-	if (isDragging) {
-		x += e.movementX + dx;
-		y += e.movementY + dy;
-		if (probablyDragging) {
-			dx = 0;
-			dy = 0;
-		}
-	} else if (probablyDragging) {
-		dx += e.movementX;
-		dy += e.movementY;
-		if (Math.abs(dx) > 2 && Math.abs(dy) > 2) {
-			isDragging = true;
-		}
-	}
-}
-
-function handlePointerUp(e: PointerEvent) {
-	if (card.isFaceDown) return;
-  ref?.releasePointerCapture(e.pointerId);
-	probablyDragging = false;
-	x = 0;
-	y = 0;
-}
-
 const cardWidth = getContext('cardWidth');
 const cardHeight = getContext('cardHeight');
 
@@ -97,14 +51,18 @@ $: contentClass = `
 	${isTopPileOpenCard ? 'items-center' : ''}
 	${isTopPileOpenCard ? 'text-3xl' : 'text-lg'}
 	${isTopPileOpenCard ? 'space-y-0' : 'space-x-2'}
+	${isRed ? 'text-red-600' : 'text-black'}
 	justify-center
 	pointer-events-none
 	font-mono
+	bg-white
+	rounded-md
+	border
+	border-black
 `
 </script>
 
 <div
-	bind:this={ref}
 	on:pointerdown={handlePointerDown}
 	class={classNames.join(' ')}
 	style:opacity
@@ -117,5 +75,7 @@ $: contentClass = `
 			<span class="pointer-events-none select-none">{card.rank}</span>
 			<span class="pointer-events-none select-none">{card.suit}</span>
 		</div>
+	{:else}
+		<BackCard />
 	{/if}
 </div>

@@ -18,11 +18,13 @@ const CARD_ASPECT_RATIO = 1.4;
 
 $: canvasWidth = Math.min(MAX_CANVAS_WIDTH, $size.width);
 $: columnSpacing = (canvasWidth - MAX_CARD_WIDTH * (N_TABLEAU_COLUMNS)) / (N_TABLEAU_COLUMNS - 1);
-$: cardWidth = MAX_CARD_WIDTH;
+$: cardWidth = Math.min(MAX_CARD_WIDTH, canvasWidth/7);
 $: cardHeight = cardWidth * CARD_ASPECT_RATIO;
 
 $: setContext('cardWidth', cardWidth);
 $: setContext('cardHeight', cardHeight);
+
+$: console.log("canvasWidth", cardWidth, canvasWidth);
 
 const store = createCards();
 setContext('store', store);
