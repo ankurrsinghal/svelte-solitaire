@@ -24,8 +24,6 @@ $: cardHeight = cardWidth * CARD_ASPECT_RATIO;
 $: setContext('cardWidth', cardWidth);
 $: setContext('cardHeight', cardHeight);
 
-$: console.log("canvasWidth", cardWidth, canvasWidth);
-
 const store = createCards();
 setContext('store', store);
 
@@ -57,10 +55,15 @@ function handlePointerMove(e: PointerEvent) {
     const { x: foundationRectX, y: foundationRectY } = foundationRect;
     const { x: tableauRectX, y: tableauRectY } = tableauRect;
 
-    if (clientY > foundationRectY && clientY < foundationRectY + cardHeight) {
-      const probableIndex = Math.floor((clientX - foundationRectX) / ((cardWidth) + (columnSpacing)));
+    const draggingCardCenterX = clientX - $pointerEvent.offsetX + cardWidth / 2;
+    const draggingCardY = clientY - $pointerEvent.offsetY + cardHeight / 2;
+
+    console.log(draggingCardCenterX, draggingCardY);
+
+    if (draggingCardY > foundationRectY && draggingCardY < foundationRectY + cardHeight) {
+      const probableIndex = Math.floor((draggingCardCenterX - foundationRectX) / ((cardWidth) + (columnSpacing)));
       if (probableIndex < 4 && probableIndex >= 0) {
-        if ((clientX - foundationRectX) < cardWidth + (probableIndex * (cardWidth + columnSpacing))) {
+        if ((draggingCardCenterX - foundationRectX) < cardWidth + (probableIndex * (cardWidth + columnSpacing))) {
           // probableIndex is correct foundation index
           if ($isCardStartedDragging.pile.type === "tableau" || $isCardStartedDragging.pile.type === "waste") {
             const newPile = { type: "foundation", index: probableIndex };
@@ -76,10 +79,10 @@ function handlePointerMove(e: PointerEvent) {
       }
     }
 
-    if (clientY > tableauRectY) {
-      const probableIndex = Math.floor((clientX - tableauRectX) / ((cardWidth) + (columnSpacing)));
+    if (draggingCardY > tableauRectY) {
+      const probableIndex = Math.floor((draggingCardCenterX - tableauRectX) / ((cardWidth) + (columnSpacing)));
       if (probableIndex < 7 && probableIndex >= 0) {
-        if ((clientX - tableauRectX) < cardWidth + (probableIndex * (cardWidth + columnSpacing))) {
+        if ((draggingCardCenterX - tableauRectX) < cardWidth + (probableIndex * (cardWidth + columnSpacing))) {
           // probableIndex is correct foundation index
           if (probableIndex !== $isCardStartedDragging.pile.index) {
             hoveredPile.set({ type: "tableau", index: probableIndex })
