@@ -1,9 +1,9 @@
 <h1 align="center">Svelte Solitaire</h1>
 <p align="center">
-    <img src="svelte-solitaire.surge.sh/screenshot.png">
+    <img src="https://svelte-solitaire.surge.sh/screenshot.png">
 </p>
 
-<h2 align="center"><a  href="svelte-solitaire.surge.sh">Live Demo</a></h2>
+<h2 align="center"><a  href="https://svelte-solitaire.surge.sh">Live Demo</a></h2>
 
 ### Contributions are Welcome
 
